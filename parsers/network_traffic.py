@@ -12,6 +12,7 @@ class RequestSniffer:
     """
 
     def __init__(self, headless: bool = True):  # do/dont display browser
+
         self.headless = headless
 
     def fetch_request_details(self, url: str) -> List[Dict]:

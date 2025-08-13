@@ -120,7 +120,6 @@ class Spider(CategoriesIterationState):
         return data
 
     def collect_products(self, url, pagination=None, products=None) -> list:
-        print(f"pagination > {str(pagination)}")
         if products is None:
             products = []
         json_data: dict = self._extract_page_props(url + pagination if pagination else url)

@@ -29,7 +29,8 @@ def main():
             # Тут необходимо развернуть логику проверки значения в базе данных. Если товар есть в Бд - обновить цену.
             # Если нет - передать айдишник в список для асинхронного парсинга подробностей товара
             for item in product_listing:
-                print(item)
+                product_details = spider.get_product_details(int(item.productId))
+                print(product_details)
             input('next...')
 
 
