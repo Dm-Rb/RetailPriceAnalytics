@@ -1,8 +1,8 @@
 from parsers.edostavkaby.spider_sync import Spider
-from parsers.edostavkaby.schemas import ProductListing
 
 
 def main():
+
     spider = Spider()
     categories = spider.get_categories()
     try:
