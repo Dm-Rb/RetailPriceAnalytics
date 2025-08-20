@@ -7,6 +7,7 @@ import pickle
 import os
 import json
 from pathlib import Path
+from typing import Iterator
 
 
 class CategoriesIterationState:
@@ -43,9 +44,19 @@ class Spider(CategoriesIterationState):
     _api = "https://api2.edostavka.by/api/v2"
 
     def __init__(self):
+        print("Running <Spider edostavka.by>")
+
         super().__init__()
         self._sniffer = RequestSniffer(headless=True)
-        self._session = self._get_request_session()
+        try:
+            print("Intercept cookies & headers -> start")
+
+            self._session = self._get_request_session()
+
+            print("Intercept cookies & headers -> done")
+        except Exception as _ex:
+            print("Intercept cookies & headers -> error!")
+            raise _ex
 
     def _get_headers_cookies(self) -> Dict:
 
@@ -141,10 +152,56 @@ class Spider(CategoriesIterationState):
             product_details = schemas.Product(**json_response['product'])
             return product_details
 
+    def crawl(self) -> Iterator[schemas.Product]:
+        ###
+        try:
+            print(f"Get all categories on {self._host}/categories -> start")
+
+            categories = self.get_categories()
+
+            print(f"Get all categories -> done")
+        except Exception as _ex:
+            print("Get all categories on {self._host} -> error!")
+            raise _ex
+
+        try:
+            start_i = self.state['i']  # загружаем состояние обхода списка категорий из файла pickle
+        except Exception as _ex:
+            start_i = 0
+        ###
+
+        for i in range(start_i, len(categories)):
+            self.state['i'] = i
+            self.write_state_2_file()  # # записываем состояние обхода списка категорий в файл pickle
+            category = categories[i]
+
+            try:
+                start_j = self.state['j']
+            except Exception as _ex:
+                start_j = 0
+
+            ###
+            for j in range(start_j, len(category['subcategories'])):
+                self.state['j'] = j
+                subcategory = category['subcategories'][j]
+                try:
+                    print(f"Collect products on {self._host}{subcategory['url']} -> start")
+
+                    product_listing = self.collect_products(subcategory['url'])
+
+                    print(f"Collect products -> done")
+                except Exception as _ex:
+                    print(f"Collect products on {self._host}{subcategory['url']} -> error!")
+                    raise _ex
+
+                ###
+                for schemas_product in product_listing:
+                    schemas_product_details = self.get_product_details(int(schemas_product.productId))
+                    yield schemas_product_details
 
 
-
-
-
-
-
+# if __name__ == "__main__": # example
+#     spider = Spider()
+#     for item in spider.crawl():
+#         print(item)
+#         input()
