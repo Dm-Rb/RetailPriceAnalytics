@@ -11,3 +11,25 @@ project/
     │   │                     логику обхода сайта-источника и порционный возврат готовых данных во внешнюю область (паттерн Producer-Consumer)
 
 
+[Unit]
+Description=AI chat bot
+After=network.target
+
+[Service]
+Type=simple
+User=amnesia
+Group=amnesia
+
+# Рабочая директория (где находится ваш скрипт)
+WorkingDirectory=/home/amnesia/tg_bots/ai_chat_bot_tg
+
+# Команда для запуска
+# Активируем venv и запускаем скрипт
+ExecStart=/home/amnesia/tg_bots/ai_chat_bot_tg/venv/bin/python /home/amnesia/tg_bots/ai_chat_bot_tg/bot.py
+
+# Перезапуск при сбое
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
