@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from database.models.catalog import Category
+from database.models.catalog import Category, Manufactory, ProductDisplay
 from typing import Union
 
 
@@ -29,5 +29,28 @@ class CatalogCRUD:
         self.session.commit()
 
         return new_category.id
+
+    def get_all_manufacturers(self):
+        return self.session.query(Manufactory).all()
+
+    def add_new_manufactory(self,
+                            full_name: str,
+                            trademark: Union[str, None] = None,
+                            country: Union[str, None] = None
+                            ) -> Manufactory.id:
+
+        new_manufactory = Manufactory(
+                trademark=trademark,
+                full_name=full_name,
+                country=country
+                    )
+        self.session.add(new_manufactory)
+        self.session.commit()
+
+        return new_manufactory.id
+
+    def get_all_product_display_by_source(self, source: str):
+        return self.session.query(ProductDisplay).filter(ProductDisplay.source == source).all()
+
 
 

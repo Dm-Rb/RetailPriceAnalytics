@@ -23,9 +23,9 @@ class Manufactory(Base):
     __table_args__ = {"schema": "catalog"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    trademark = Column(String(100), nullable=False)
-    full_name = Column(String(300), nullable=True)
-    country = Column(String(52))
+    trademark = Column(String(100), nullable=True)
+    full_name = Column(String(300), nullable=False)
+    country = Column(String(52), nullable=True)
 
     product = relationship("Product", back_populates="manufacturer",
                           lazy="dynamic")  # lazy="dynamic" для фильтрации
