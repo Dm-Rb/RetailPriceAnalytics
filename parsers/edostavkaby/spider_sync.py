@@ -131,20 +131,18 @@ class Spider(CategoriesIterationState):
         return data
 
     def collect_products(self, url, pagination=None, products=None) -> list:
-        print(f"pagination > {str(pagination)}")
         if products is None:
             products = []
+
         json_data: dict = self._extract_page_props(url + pagination if pagination else url)
         json_data_listing = json_data["props"]["pageProps"]["listing"]
         product_listing = schemas.ProductListing(**json_data_listing)
         products.extend(product_listing.products)
-
         # The base case of recursion
         if product_listing.pageNumber >= product_listing.pageAmount:
             # product_listing.products = products
             return products
         pagination = f"?page={str(product_listing.pageNumber + 1)}"
-
         return self.collect_products(url, pagination, products)
 
     def get_product_details(self, product_id: int) -> schemas.Product or None:
@@ -189,7 +187,6 @@ class Spider(CategoriesIterationState):
                     print(f"Collect products on {self._host}{subcategory['url']} -> start")
 
                     product_listing = self.collect_products(subcategory['url'])
-
                     print(f"Collect products -> done")
                 except Exception as _ex:
                     print(f"Collect products on {self._host}{subcategory['url']} -> error!")
