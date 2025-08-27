@@ -19,7 +19,7 @@ def get_cache(session_factory):
     return cache
 
 
-def processing_category(session_factory, cache, category_name, parent_name):
+def save_category_update_cache(session_factory, cache, category_name, parent_name):
     with session_factory() as session:
         catalog_db = CatalogCRUD(session)
         if not parent_name:
@@ -36,19 +36,32 @@ def processing_category(session_factory, cache, category_name, parent_name):
         return
 
 
-def processing_manufacturer(session_factory, cache, trademark, full_name, country):
+def save_manufacturer_update_cache(session_factory, cache, trademark, full_name, country):
     with session_factory() as session:
         catalog_db = CatalogCRUD(session)
         db_id = catalog_db.add_new_manufactory(trademark=trademark, full_name=full_name, country=country)
         cache.manufacturers[full_name] = db_id
         return
 
-def processing_product_display(session_factory, cache, product_id, full_name, country):
+def save_product_display_update_cache(session_factory, cache, product_id, full_name, country):
     with session_factory() as session:
         catalog_db = CatalogCRUD(session)
         db_id = catalog_db.add_new_manufactory(trademark=trademark, full_name=full_name, country=country)
         cache.manufacturers[full_name] = db_id
         return
+
+def save_product(session_factory, manufacturer_id, name, description, composition, storage_info, unit):
+    with session_factory() as session:
+        catalog_db = CatalogCRUD(session)
+        db_id = catalog_db.add_new_product(
+            manufacturer_id=manufacturer_id,
+            name=name,
+            description=description,
+            composition=composition,
+            storage_info=storage_info,
+            unit=unit
+        )
+        return db_id
 
 
 def main():
@@ -86,7 +99,7 @@ def main():
         # product-display
         if product.productId:
             if not cache.product_display.get(product.productId, None):
-                # Записать в таблицу product т получить id
+
 
 
 

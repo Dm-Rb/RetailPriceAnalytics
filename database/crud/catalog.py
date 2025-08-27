@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from database.models.catalog import Category, Manufactory, ProductDisplay
+from database.models.catalog import Category, Manufactory, ProductDisplay, Product
 from typing import Union
 
 
@@ -8,7 +8,7 @@ class CatalogCRUD:
     def __init__(self, session: Session):
         self.session = session
 
-    def get_all_categories(self):
+    def get_all_categories(self) -> list:
         return self.session.query(Category).all()
 
     def add_new_category(self, name: str,
@@ -30,7 +30,7 @@ class CatalogCRUD:
 
         return new_category.id
 
-    def get_all_manufacturers(self):
+    def get_all_manufacturers(self) -> list:
         return self.session.query(Manufactory).all()
 
     def add_new_manufactory(self,
@@ -49,8 +49,31 @@ class CatalogCRUD:
 
         return new_manufactory.id
 
-    def get_all_product_display_by_source(self, source: str):
-        return self.session.query(ProductDisplay).filter(ProductDisplay.source == source).all()
+    def add_new_product(self,
+                        manufacturer_id: int,
+                        name: str,
+                        barcode: Union[str, None] = None,
+                        description: Union[str, None] = None,
+                        composition: Union[str, None] = None,
+                        storage_info: Union[str, None] = None,
+                        unit: Union[str, None] = None
+                        ) -> Product.id:
 
+        new_product = Product(
+            manufacturer_id=manufacturer_id,
+            name=name,
+            barcode=barcode,
+            description=description,
+            composition=composition,
+            storage_info=storage_info,
+            unit=unit
+        )
+        self.session.add(new_product)
+        self.session.commit()
+
+        return new_product.id
+
+    def get_all_product_display_by_source(self, source: str) -> list:
+        return self.session.query(ProductDisplay).filter(ProductDisplay.source == source).all()
 
 
