@@ -6,4 +6,4 @@ if __name__ == "__main__":
         # Парсинг и сохранение данных
         catalog_db = CatalogCRUD(session)
         r = catalog_db.get_all_categories()
-        catalog_db.add_new_category('Чеснок', parent_name="Овощи")
+        catalog_db.save_new_category('Чеснок', parent_name="Овощи")

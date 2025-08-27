@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from database.models.catalog import Category, Manufactory, ProductDisplay, Product, Property, ProductPropertyValue
+from database.models.catalog import Category, Manufactory, ProductDisplay, Product, Property, ProductPropertyValue, \
+    ProductCategory
 from typing import Union
 
 
@@ -11,10 +12,10 @@ class CatalogCRUD:
     def get_all_categories(self) -> list:
         return self.session.query(Category).all()
 
-    def add_new_category(self, name: str,
-                         parent_id: Union[int, None] = None,
-                         parent_name: Union[str, None] = None
-                         ) -> Category.id:
+    def save_new_category(self, name: str,
+                          parent_id: Union[int, None] = None,
+                          parent_name: Union[str, None] = None
+                          ) -> Category.id:
         # если передан parent_name -> искать его id
         if parent_name:
             parent_id = self.session.query(Category.id).filter(Category.name == parent_name).first().get('id', None)
@@ -33,11 +34,11 @@ class CatalogCRUD:
     def get_all_manufacturers(self) -> list:
         return self.session.query(Manufactory).all()
 
-    def add_new_manufactory(self,
-                            full_name: str,
-                            trademark: Union[str, None] = None,
-                            country: Union[str, None] = None
-                            ) -> Manufactory.id:
+    def save_new_manufactory(self,
+                             full_name: str,
+                             trademark: Union[str, None] = None,
+                             country: Union[str, None] = None
+                             ) -> Manufactory.id:
 
         new_row = Manufactory(
                 trademark=trademark,
@@ -49,15 +50,15 @@ class CatalogCRUD:
 
         return new_row.id
 
-    def add_new_product(self,
-                        manufacturer_id: int,
-                        name: str,
-                        barcode: Union[str, None] = None,
-                        description: Union[str, None] = None,
-                        composition: Union[str, None] = None,
-                        storage_info: Union[str, None] = None,
-                        unit: Union[str, None] = None
-                        ) -> Product.id:
+    def save_new_product(self,
+                         manufacturer_id: int,
+                         name: str,
+                         barcode: Union[str, None] = None,
+                         description: Union[str, None] = None,
+                         composition: Union[str, None] = None,
+                         storage_info: Union[str, None] = None,
+                         unit: Union[str, None] = None
+                         ) -> Product.id:
 
         new_row = Product(
             manufacturer_id=manufacturer_id,
@@ -76,24 +77,37 @@ class CatalogCRUD:
     def get_all_product_display_by_source(self, source: str) -> list:
         return self.session.query(ProductDisplay).filter(ProductDisplay.source == source).all()
 
-    def add_new_product_display(self, source: str, product_id: int, article: str) -> ProductDisplay.id:
-        new_row = ProductDisplay(source=source, product_id=product_id, article=article)
-        self.session.add(new_row)
-        self.session.commit()
-
-        return new_row.id
-
+    # def add_new_product_display(self, source: str, product_id: int, article: str) -> ProductDisplay.id:
+    #     new_row = ProductDisplay(source=source, product_id=product_id, article=article)
+    #     self.session.add(new_row)
+    #     self.session.commit()
+    #
+    #     return new_row.id
+    #
     def get_all_properties(self) -> list:
         return self.session.query(Property).all()
+    #
+    # def add_new_property(self, name: str, group: Union[str, None]=None):
+    #     new_row = Property(name=name, group=group)
+    #     self.session.add(new_row)
+    #     self.session.commit()
+    #     return new_row.id
 
-    def add_new_property(self, name: str, group: Union[str, None]=None):
-        new_row = Property(name=name, group=group)
-        self.session.add(new_row)
-        self.session.commit()
-        return new_row.id
+    # def add_new_product_property(self, product_id: int, property_id: int, value: Union[str, None]=None):
+    #     new_row = ProductPropertyValue(product_id=product_id, property_id=property_id, value=value)
+    #     self.session.add(new_row)
+    #     self.session.commit()
+    #     return new_row.id
 
-    def add_new_product_property(self, product_id: int, property_id: int, value: Union[str, None]=None):
-        new_row = ProductPropertyValue(product_id=product_id, property_id=property_id, value=value)
-        self.session.add(new_row)
+    def save_product_category_relations(self, product_id: int, categories_id: list[int]):
+        new_rows = [
+            ProductCategory(
+                product_id=product_id,
+                category_id=category_id
+            )
+            for category_id in categories_id
+        ]
+
+        # Добавляем все объекты за одну операцию
+        self.session.add_all(new_rows)
         self.session.commit()
-        return new_row.id
