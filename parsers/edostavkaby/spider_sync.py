@@ -197,7 +197,10 @@ class Spider(CategoriesIterationState):
                     schemas_product_details = self.get_product_details(int(schemas_product.productId))
                     yield schemas_product_details
 
-
+        try:
+            os.remove(self._state_file_path)
+        except:
+            print('o kurwa!!!')
 # if __name__ == "__main__": # example
 #     spider = Spider()
 #     for item in spider.crawl():

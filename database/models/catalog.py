@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, Column, DateTime, ForeignKey, Numeric
+from sqlalchemy import Integer, String, Column, DateTime, ForeignKey, Numeric, VARCHAR, Text
 from sqlalchemy.orm import relationship
 from .base import Base
 
@@ -43,9 +43,9 @@ class Product(Base):
     manufacturer_id = Column(Integer, ForeignKey("catalog.manufacturers.id"), nullable=False)
     name = Column(String(255), nullable=False)
     barcode = Column(String(14), nullable=True)
-    description = Column(String(350), nullable=True)
-    composition = Column(String(500), nullable=True)
-    storage_info = Column(String(350), nullable=True)
+    description = Column(VARCHAR(5000), nullable=True)
+    composition = Column(String(1400), nullable=True)
+    storage_info = Column(String(400), nullable=True)
     unit = Column(String(15), nullable=True)
 
     manufacturer = relationship("Manufactory", back_populates="product")
@@ -101,10 +101,21 @@ class ProductPropertyValue(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey("catalog.products.id"), nullable=False)
     property_id = Column(Integer, ForeignKey("catalog.properties.id"), nullable=False)
-    value = Column(String(250), nullable=True)
+    value = Column(Text, nullable=True)
 
     product = relationship("Product")
     property = relationship("Property")
+
+
+class ProductImage(Base):
+    __tablename__ = "relations_product_image"
+    __table_args__ = {"schema": "catalog"}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    product_id = Column(Integer, ForeignKey("catalog.products.id"), nullable=False)
+    image_url = Column(String(300), nullable=False)
+
+    product = relationship("Product")
 
 
 class ProductPrice(Base):
