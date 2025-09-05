@@ -5,7 +5,7 @@ from datetime import datetime as dt
 
 def main():
     spider = Spider()
-    session_factory = get_session_factory()
+    session_factory = get_session_factory('test')
     service_data = CategoryService(session_factory)
 
     """
