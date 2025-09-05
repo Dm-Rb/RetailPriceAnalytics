@@ -3,9 +3,10 @@ from database.session import get_session_factory
 from parsers.edostavkaby.service import CategoryService
 from datetime import datetime as dt
 
+
 def main():
     spider = Spider()
-    session_factory = get_session_factory('test')
+    session_factory = get_session_factory('edostavka_by')
     service_data = CategoryService(session_factory)
 
     """
