@@ -21,9 +21,7 @@ def main():
             product_display_id = service_data.get_product_display_id(product_id=product_id,
                                                                      article=str(product.productId),
                                                                      source='edostavka.by')
-            print('1')
         else:
-            print('2')
             # manufacturer
             if product.legalInfo.trademarkName:
                 trademark = product.legalInfo.trademarkName

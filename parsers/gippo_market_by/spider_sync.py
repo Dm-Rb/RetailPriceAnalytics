@@ -112,16 +112,20 @@ class Spider(CategoriesIterationState):
                 main_categories.append(category_item)
         return main_categories
 
-
-
-
-
-
     def crawl(self):
-        categories: List[dict] = self.get_categories()
-        main_categories: List[dict] = self.cut_categories(categories)
-        # Этот словарь для преобразования хлебных крошек в объекте продукта
-        categories_parent_hash: dict = {i['slug']: i['parent_slug'] for i in categories}  # {category_slug: category_parent_slug}
+        try:
+            print(print(f"Get all categories on {self._host} -> start"))
+            categories: List[dict] = self.get_categories()
+            main_categories: List[dict] = self.cut_categories(categories)  # По этим категориям происходит итерация и запрос на получение товаров
+            # Этот словарь для преобразования хлебных крошек в объекте продукта
+            categories_slug_title_hash: dict = {i['slug']: i['title'] for i in categories}  # slug: title
+            categories_parent_hash: dict = {i['slug']: categories_slug_title_hash[i['parent_slug']]
+            if i['parent_slug'] else None for i in categories if i['parent_slug']}  # {category_slug: category_parent_title}
+            print(f"Get all categories -> done")
+        except Exception as _ex:
+            print(f"Get all categories -> error! {_ex}")
+            raise _ex
+
         try:
             start_i = self.state['i']  # загружаем состояние обхода списка категорий из файла pickle
         except Exception as _ex:
@@ -133,28 +137,34 @@ class Spider(CategoriesIterationState):
 
             category_item = main_categories[i]
             category_id = category_item['id']
+
+            print(f"Collect products  on {category_item['title']} -> start")
             products = self.collect_products(category_item['slug'])
+            print(f"Collect products -> done")
 
             for product_item in products:
                 product_details = self.get_product_details(product_item['id'], category_id)
                 print(product_details)
                 schemas_product_details = Product(**product_details)
-                # Добавляем значения в categories в поля parent_title (имя родительской категории)
+                # Добавляем в schemas_product_details.categories главную родительскую категорию первого уровня
+                # если её там нет
+                schemas_product_details.add_main_category(category_title=category_item['title'],
+                                                          category_slug=category_item['slug'])
+                # Добавляем значения в parent_title (имя родительской категории)
                 for j in range(len(schemas_product_details.categories)):
-                    if schemas_product_details.categories[j].title is None: # Если в документе нет поля
+                    if schemas_product_details.categories[j].title is None:  # Если в документе нет поля
                         schemas_product_details.categories[j].title = category_item['title']
-
                         continue
                     parent_title = categories_parent_hash[schemas_product_details.categories[j].slug]
-                    if parent_title == 'vse':
+                    if parent_title == 'Все':
                         parent_title = None
                     schemas_product_details.categories[j].parent_title = parent_title
-                yield schemas_product_details
+                print(schemas_product_details)
+                # yield schemas_product_details
         try:
             os.remove(self._state_file_path)
         except Exception as _ex:
             print(_ex)
-
 
 spider = Spider()
 spider.crawl()
