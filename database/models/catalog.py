@@ -7,7 +7,7 @@ class Category(Base):
     __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(30), nullable=False)
+    name = Column(String(80), nullable=False)
     parent_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
 
     parent = relationship("Category",

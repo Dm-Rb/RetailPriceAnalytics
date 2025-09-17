@@ -9,6 +9,12 @@ class RequestSniffer:
     This class provides automated web browser control.
     It captures and returns headers, response body content, and cookies from the website passed
     as an argument to the method.
+    return [
+                {'url': str, 'method': str,
+                'request_headers': {k:v, ...}, 'status': int,
+                'response_headers': {k:v, ...},
+                'response_body': str|dict,
+                'cookies': [{k:v, ...}]
     """
 
     def __init__(self, headless: bool = True):  # do/dont display browser
@@ -16,7 +22,7 @@ class RequestSniffer:
 
     def fetch_request_details(self, url: str) -> List[Dict]:
         traffic_data = []
-        request_store: Dict[object, Dict] = {}
+        request_store = {}
 
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=self.headless)
@@ -32,26 +38,42 @@ class RequestSniffer:
 
             def handle_response(response):
                 request = response.request
+                if request not in request_store:
+                    return
 
-                if request in request_store:
-                    try:
-                        body = response.text()
-                    except Exception as e:
-                        body = f"[Error getting response body: {e}]"
+                try:
+                    body = response.text()
+                except Exception as e:
+                    body = f"[Error getting response body: {e}]"
 
-                    entry = request_store[request]
-                    entry.update({
-                        'status': response.status,
-                        'response_headers': dict(response.headers),
-                        'response_body': body,
-                        'cookies': context.cookies(),
-                    })
-                    traffic_data.append(entry)
+                entry = request_store[request]
+                entry.update({
+                    'status': response.status,
+                    'response_headers': dict(response.headers),
+                    'response_body': body,
+                })
+                traffic_data.append(entry)
 
             page.on("request", handle_request)
             page.on("response", handle_response)
 
-            page.goto(url, wait_until="networkidle")
-            browser.close()
+            try:
+                cleaned_url = url.rstrip('/')
+                page.goto(cleaned_url, wait_until="domcontentloaded", timeout=10000)
+                page.wait_for_load_state("networkidle", timeout=10000)
+
+                # Получаем cookies после завершения всех операций
+                cookies = context.cookies()
+                # Добавляем cookies ко всем записям
+                for entry in traffic_data:
+                    entry['cookies'] = cookies
+
+            except Exception as e:
+                print(f"Navigation error: {e}")
+            finally:
+                # Удаляем обработчики перед закрытием
+                page.remove_listener("request", handle_request)
+                page.remove_listener("response", handle_response)
+                browser.close()
 
         return traffic_data
