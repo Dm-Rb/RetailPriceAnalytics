@@ -9,16 +9,12 @@ class Category(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(80), nullable=False)
     parent_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+    source_id = Column(Integer, ForeignKey("sources.id"), nullable=False)
 
-    parent = relationship("Category",
-                         remote_side=[id],
-                         backref="subcategories",
-                         foreign_keys=[parent_id])  # Добавляем foreign_keys
-
-    product_category = relationship('ProductCategory', back_populates='category')
-
-    def __repr__(self):
-        return f"<Category(id={self.id}, name='{self.name}', parent_id='{self.parent_id}')>"
+    # relationships
+    parent = relationship("Category", remote_side=[id], backref="subcategories")
+    source = relationship("Source", back_populates="categories")
+    product_category = relationship("ProductCategory", back_populates="category")  # исправлено на category
 
 
 class Manufactory(Base):
@@ -26,15 +22,13 @@ class Manufactory(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     trademark = Column(String(100), nullable=True)
-    full_name = Column(String(300), nullable=False)
+    full_name = Column(String(300), nullable=True)
     country = Column(String(52), nullable=True)
+    source_id = Column(Integer, ForeignKey("sources.id"), nullable=False)
 
-    product = relationship("Product", back_populates="manufacturer",
-                          lazy="dynamic")  # lazy="dynamic" для фильтрации
-
-    def __repr__(self):
-        return f"<Manufactory(id={self.id}, trademark='{self.trademark}', " \
-               f"full_name='{self.full_name}, country='{self.country}')>"
+    # relationships
+    source = relationship("Source", back_populates="manufacturers")
+    product = relationship("Product", back_populates="manufacturer")
 
 
 class Product(Base):
@@ -42,16 +36,34 @@ class Product(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     manufacturer_id = Column(Integer, ForeignKey("manufacturers.id"), nullable=False)
+    source_id = Column(Integer, ForeignKey("sources.id"), nullable=False)
     name = Column(String(255), nullable=False)
     barcode = Column(String(14), nullable=True)
     description = Column(Text, nullable=True)
     composition = Column(Text, nullable=True)
     storage_info = Column(Text, nullable=True)
     unit = Column(String(15), nullable=True)
+    source_article = Column(String(60), nullable=True)
 
-    manufacturer = relationship("Manufactory", back_populates="product")
-    product_category = relationship("ProductCategory", back_populates="product")
-    product_display = relationship("ProductDisplay", back_populates="product")
+    # relationships
+    source = relationship("Source", back_populates="product")
+    manufacturer = relationship("Manufactory", back_populates="product")  # исправлено на Manufactory
+    product_category = relationship("ProductCategory", back_populates="product")  # исправлено на product
+    property_value = relationship("ProductPropertyValue", back_populates="product")  # исправлено на product
+    image = relationship("ProductImage", back_populates="product")  # исправлено на product
+    price = relationship("ProductPrice", back_populates="product")  # исправлено на product
+
+
+class Source(Base):
+    __tablename__ = "sources"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(40), nullable=False)
+
+    # relationships
+    categories = relationship("Category", back_populates="source")
+    manufacturers = relationship("Manufactory", back_populates="source")  # исправлено на Manufactory
+    product = relationship("Product", back_populates="source")
 
 
 class Property(Base):
@@ -61,38 +73,23 @@ class Property(Base):
     name = Column(String(255), nullable=False)
     group = Column(String(255), nullable=True)
 
+    # relationships
+    property_value = relationship("ProductPropertyValue", back_populates="property")  # исправлено на property
+
 
 class ProductCategory(Base):
     __tablename__ = "relations_product_category"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
-    category_id = Column(Integer, ForeignKey('categories.id'))
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
 
-    product = relationship("Product", back_populates="product_category")
-    category = relationship("Category", back_populates="product_category")
-
-
-class ProductDisplay(Base):
-    """
-    Таблица связей. Содержит название артикула товара.
-    Артикула в разных источниках разные для одного  и того же товара, в связи с этим имеется эта таблица
-    """
-    __tablename__ = "relations_product_display"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    source = Column(String(35), nullable=False)
-    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
-    article = Column(String(35), nullable=True)
-
-    product = relationship("Product", back_populates="product_display")
+    # relationships
+    product = relationship("Product", back_populates="product_category")  # исправлено на product
+    category = relationship("Category", back_populates="product_category")  # исправлено на category
 
 
 class ProductPropertyValue(Base):
-    """
-    Таблица связей. Содержит название артикула товара.
-    Артикула в разных источниках разные для одного  и того же товара, в связи с этим имеется эта таблица
-    """
     __tablename__ = "relations_product_property"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -100,8 +97,9 @@ class ProductPropertyValue(Base):
     property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
     value = Column(Text, nullable=True)
 
-    product = relationship("Product")
-    property = relationship("Property")
+    # relationships
+    product = relationship("Product", back_populates="property_value")  # исправлено на product
+    property = relationship("Property", back_populates="property_value")  # исправлено на property
 
 
 class ProductImage(Base):
@@ -111,16 +109,17 @@ class ProductImage(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     image_url = Column(String(300), nullable=False)
 
-    product = relationship("Product")
+    # relationships
+    product = relationship("Product", back_populates="image")
 
 
 class ProductPrice(Base):
-    __tablename__ = "relations_product_price"
+    __tablename__ = "prices"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    product_display_id = Column(Integer, ForeignKey("relations_product_display.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     price = Column(Numeric(10, 2))
     date_time = Column(DateTime, nullable=False)
 
-    product_display = relationship("ProductDisplay")
-
+    # relationships
+    product = relationship("Product", back_populates="price")  # исправлено на product

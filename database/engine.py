@@ -18,4 +18,7 @@ def get_database_url():
 
 def create_db_engine():
     url = get_database_url()
-    return create_engine(url, echo=os.getenv('DB_ECHO', 'False').lower() == 'true')
+    echo = os.getenv("DB_ECHO", "False").lower() == "true"
+
+    engine = create_engine(url, echo=echo, future=True)
+    return engine

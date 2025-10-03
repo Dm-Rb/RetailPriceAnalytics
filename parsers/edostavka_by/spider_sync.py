@@ -24,7 +24,7 @@ class CategoriesIterationState:
         if not os.path.exists(self._state_file_path):
             return {"i": 0, "j": 0}
         else:
-            print('EdostavkaParser will continue to execute using the "state.pickle" file')
+            print('Parser will continue to execute using the "state.pickle" file')
             input('Press Enter to continue... ')
             with open(self._state_file_path, 'rb') as f:
                 return pickle.load(f)
