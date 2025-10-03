@@ -96,15 +96,10 @@ class CatalogCRUD:
         self.session.commit()
 
         return new_row.id
-    #
+
     def get_articles_and_ids_by_source(self, source_id: str) -> list:
         return self.session.query(Product.id, Product.source_article).filter(Product.source_id == source_id).all()
-    #
-    # # def get_product_display_id(self, product_id: int , article: str, source: str):
-    # #     return self.session.query(ProductDisplay.id).filter(ProductDisplay.product_id == product_id,
-    # #                                                         ProductDisplay.article == article,
-    # #                                                         ProductDisplay.source == source).first()
-    #
+
     def get_all_properties(self) -> list:
         return self.session.query(Property).all()
 
