@@ -142,29 +142,33 @@ class Spider(CategoriesIterationState):
             print(f"Collect products -> done")
 
             for product_item in products:
-                product_details = self.get_product_details(product_item['id'], category_id)
-                schemas_product_details = Product(**product_details)
-                # Добавляем в schemas_product_details.categories главную родительскую категорию первого уровня
-                # если её там нет
-                schemas_product_details.add_main_category(category_title=category_item['title'],
-                                                          category_slug=category_item['slug'])
-                # Добавляем значения в parent_name (имя родительской категории). На текущий момент этот аттрибут none
-                #
-                for j in range(len(schemas_product_details.categories)):
-                    if schemas_product_details.categories[j].title is None:  # Если в документе нет поля
-                        schemas_product_details.categories[j].title = category_item['title']
-                        continue
-                    try:
-                        category_article = categories_slug_hash[schemas_product_details.categories[j].slug]
-                    except KeyError:
-                        continue
-                    parent_article = categories_article_hash[category_article]['parent_id']
-                    parent_name = categories_article_hash[parent_article]['name']
-                    if parent_name == 'Все':
-                        parent_name = None
-                    schemas_product_details.categories[j].parent_title = parent_name
+                try:
+                    product_details = self.get_product_details(product_item['id'], category_id)
+                    schemas_product_details = Product(**product_details)
+                    # Добавляем в schemas_product_details.categories главную родительскую категорию первого уровня
+                    # если её там нет
+                    schemas_product_details.add_main_category(category_title=category_item['title'],
+                                                              category_slug=category_item['slug'])
+                    # Добавляем значения в parent_name (имя родительской категории). На текущий момент этот аттрибут none
+                    #
+                    for j in range(len(schemas_product_details.categories)):
+                        if schemas_product_details.categories[j].title is None:  # Если в документе нет поля
+                            schemas_product_details.categories[j].title = category_item['title']
+                            continue
+                        try:
+                            category_article = categories_slug_hash[schemas_product_details.categories[j].slug]
+                        except KeyError:
+                            continue
+                        parent_article = categories_article_hash[category_article]['parent_id']
+                        parent_name = categories_article_hash[parent_article]['name']
+                        if parent_name == 'Все':
+                            parent_name = None
+                        schemas_product_details.categories[j].parent_title = parent_name
 
-                yield schemas_product_details
+                    yield schemas_product_details
+                except Exception as _ex:
+                    print(_ex)
+                    continue
         try:
             os.remove(self._state_file_path)
         except Exception as _ex:
