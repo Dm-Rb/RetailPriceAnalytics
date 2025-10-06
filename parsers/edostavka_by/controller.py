@@ -76,6 +76,6 @@ def main():
                                                        image_urls_list=product.images)
         # ###  price  ###
         service_data.save_product_price(product_id=product_id,
-                                        price=float(product.price.discountPrice),
+                                        price=float(product.price.discountedPrice),
                                         date_time=str(dt.now().replace(microsecond=0)))
 
