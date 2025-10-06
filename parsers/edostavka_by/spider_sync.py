@@ -187,12 +187,16 @@ class Spider(CategoriesIterationState):
                     print(f"Collect products -> done")
                 except Exception as _ex:
                     print(f"Collect products on {self._host}{subcategory['url']} -> error!")
-                    raise _ex
+                    continue
 
                 ###
                 for schemas_product in product_listing:
-                    schemas_product_details = self.get_product_details(int(schemas_product.productId))
-                    yield schemas_product_details
+                    try:
+                        schemas_product_details = self.get_product_details(int(schemas_product.productId))
+                        yield schemas_product_details
+                    except Exception as _ex:
+                        print(_ex)
+                        continue
 
             self.state['j'] = 0
         try:
