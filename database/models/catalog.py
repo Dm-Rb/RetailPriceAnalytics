@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, String, Column, DateTime, ForeignKey, Numeric, Text
 from sqlalchemy.orm import relationship
 from .base import Base
+from sqlalchemy import Index
 
 
 class Category(Base):
@@ -87,6 +88,11 @@ class ProductCategory(Base):
     # relationships
     product = relationship("Product", back_populates="product_category")  # исправлено на product
     category = relationship("Category", back_populates="product_category")  # исправлено на category
+
+    # Составной уникальный индекс. По нему будем избегать записи дубликатов
+    __table_args__ = (
+        Index('idx_unique_product_category', 'product_id', 'category_id', unique=True),
+    )
 
 
 class ProductPropertyValue(Base):

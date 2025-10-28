@@ -60,6 +60,7 @@ class Product(BaseModel):
     price: str | float | None
 
     @model_validator(mode="before")
+    @classmethod
     def transform_properties(cls, values: dict):  # values — это сырые данные, переданные в  Product, Product(-> **data)
         """
         Этот декоратор позволяет функции предобработать сырые данные до того, как они

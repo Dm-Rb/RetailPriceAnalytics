@@ -75,5 +75,4 @@ class RequestSniffer:
                 page.remove_listener("request", handle_request)
                 page.remove_listener("response", handle_response)
                 browser.close()
-
         return traffic_data

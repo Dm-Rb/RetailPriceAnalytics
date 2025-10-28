@@ -1,6 +1,6 @@
 from parsers.edostavka_by.controller import main as edostavka_by_run
 from parsers.gippo_market_by.controller import main as gippo_market_by_run
-
+from parsers.green_dostavka_by.controller import main as green_dostavka_by_run
 import schedule
 import time
 
@@ -15,11 +15,16 @@ def start_scrapping():
         gippo_market_by_run()
     except Exception as ex:
         print(ex)
+    #
+    try:
+        green_dostavka_by_run()
+    except Exception as ex:
+        print(ex)
 
 
 if __name__ == "__main__":
-    schedule.every().day.at("01:30").do(start_scrapping)
-    while True:
-        schedule.run_pending()
-        time.sleep(60)
-
+    start_scrapping()
+    # schedule.every().day.at("01:30").do(start_scrapping)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(60)

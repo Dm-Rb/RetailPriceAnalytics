@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from database.models.catalog import Category, Manufactory, Source, Product, Property, ProductPropertyValue, \
     ProductCategory, ProductImage, ProductPrice
 from typing import Union
+from sqlalchemy.dialects.postgresql import insert
 
 
 class CatalogCRUD:
@@ -110,16 +111,25 @@ class CatalogCRUD:
         return new_row.id
 
     def save_product_category_relations(self, product_id: int, categories_id: list[int]):
-        new_rows = [
-            ProductCategory(
-                product_id=product_id,
-                category_id=category_id
-            )
+        if not categories_id:
+            return
+
+        # Создаем список словарей для массовой вставки
+        values = [
+            {"product_id": product_id, "category_id": category_id}
             for category_id in categories_id
         ]
 
-        # Добавляем все объекты за одну операцию
-        self.session.add_all(new_rows)
+        # Создаем insert statement для пропуска дублирующих строк
+        stmt = insert(ProductCategory).values(values)
+
+        # Добавляем обработку конфликтов - пропускаем дубликаты
+        stmt = stmt.on_conflict_do_nothing(
+            index_elements=['product_id', 'category_id']  # предполагая, что это уникальная пара
+        )
+
+        # Выполняем запрос
+        self.session.execute(stmt)
         self.session.commit()
 
     def save_product_property_values_relations(self, product_id: int, property_id: int, values: list = None):

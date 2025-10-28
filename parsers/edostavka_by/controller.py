@@ -50,7 +50,6 @@ def main():
                 categories_id_list.append(category_id)
             # relationship product-category
             service_data.save_product_category_relations(product_id=product_id, categories_id=categories_id_list)
-
             # properties
             for group_property in product.additionalProperties:
                 for group_name in group_property.groupProperty:

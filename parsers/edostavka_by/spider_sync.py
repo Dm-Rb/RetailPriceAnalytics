@@ -68,7 +68,6 @@ class Spider(CategoriesIterationState):
         headers = request_details[0]['request_headers']
         cookies = {x['name']: x['value'] for x in request_details[0]['cookies']}
         self._sniffer = None
-
         return {'headers': headers, 'cookies': cookies}
 
     def _get_request_session(self) -> requests.Session:
@@ -205,7 +204,8 @@ class Spider(CategoriesIterationState):
             print(_ex)
 
 # if __name__ == "__main__": # example
-#     spider = Spider()
-#     for item in spider.crawl():
-#         print(item)
-#         input()
+# spider = Spider()
+# spider.crawl()
+# for item in spider.crawl():
+#     print(item)
+# #         input()
