@@ -42,6 +42,7 @@ def start_scrapping():
 
 
 if __name__ == "__main__":
+    print("start")
     start_scrapping()
     schedule.every().day.at("01:30").do(start_scrapping)
     while True:
