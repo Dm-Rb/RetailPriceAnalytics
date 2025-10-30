@@ -20,22 +20,30 @@ def timer_decorator(func):
 
     return wrapper
 
+
 def start_scrapping():
     try:
-        timer_decorator(edostavka_by_run())
+        decorated_func = timer_decorator(edostavka_by_run)()
+        decorated_func()
     except Exception as ex:
         print(ex)
     #
     try:
-        timer_decorator(gippo_market_by_run())
+        decorated_func = timer_decorator(gippo_market_by_run)
+        decorated_func()
     except Exception as ex:
         print(ex)
     try:
-        timer_decorator(green_dostavka_by_run())
+        decorated_func = timer_decorator(green_dostavka_by_run)
+        decorated_func()
+
     except Exception as ex:
         print(ex)
 
+
 if __name__ == "__main__":
+    print("start")
+    start_scrapping()
     schedule.every().day.at("01:30").do(start_scrapping)
     while True:
         schedule.run_pending()
