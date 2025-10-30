@@ -23,21 +23,19 @@ def timer_decorator(func):
 
 def start_scrapping():
     try:
-        timer_decorator(edostavka_by_run())
-        print('edostavka_by done...')
+        decorated_func = timer_decorator(edostavka_by_run)()
+        decorated_func()
     except Exception as ex:
         print(ex)
     #
     try:
-        timer_decorator(gippo_market_by_run())
-        print('gippo_market_by done...')
-
+        decorated_func = timer_decorator(gippo_market_by_run)
+        decorated_func()
     except Exception as ex:
         print(ex)
-    #
     try:
-        timer_decorator(green_dostavka_by_run())
-        print('green_dostavka_by done...')
+        decorated_func = timer_decorator(green_dostavka_by_run)
+        decorated_func()
 
     except Exception as ex:
         print(ex)
