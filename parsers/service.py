@@ -32,8 +32,9 @@ class CategoryService(Cache):
                 self.manufacturers.setdefault(self.string_hash((item.trademark or "") + (item.full_name or "")), item.id)
 
             # articles
+            # self.articles = {article: id, article: id, ...}
             for item in catalog_db.get_articles_and_ids_by_source(source_id=self.source_id):
-                self.articles.setdefault(item[1], item[0])  # item is tuple(id, article)
+                self.articles.setdefault(item[1], item[0])
 
             # properties
             for item in catalog_db.get_all_properties():
@@ -57,6 +58,9 @@ class CategoryService(Cache):
         return string
 
     def get_product_id(self, manufacturer_id, name, description, composition, storage_info, unit, article, barcode):
+        if self.articles.get(article, None):
+            return self.articles[article]
+
         with self.__session_factory() as session:
             catalog_db = CatalogCRUD(session)
             product_id = catalog_db.save_new_product(
@@ -121,18 +125,6 @@ class CategoryService(Cache):
             property_id = catalog_db.save_new_property(name, group)
         self.properties.setdefault(name, property_id)
         return property_id
-
-    # def get_product_display_id(self, product_id: int, display: str, source: str):
-    #     if self.product_display.get(display, None):
-    #         return self.product_display[str(display)]
-    #
-    #     with self.__session_factory() as session:
-    #         catalog_db = CatalogCRUD(session)
-    #         product_display_id = catalog_db.get_product_display_id(product_id=product_id,
-    #                                                                article=display,
-    #                                                                source=source)
-    #     if product_display_id:
-    #         return product_display_id[0]
 
     def save_product_category_relations(self, product_id: int, categories_id: list[id]):
         with self.__session_factory() as session:

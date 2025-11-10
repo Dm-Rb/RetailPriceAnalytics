@@ -114,23 +114,32 @@ class CatalogCRUD:
         if not categories_id:
             return
 
-        # Создаем список словарей для массовой вставки
-        values = [
-            {"product_id": product_id, "category_id": category_id}
+        new_rows = [
+            ProductCategory(product_id=product_id,
+                            category_id=category_id,
+                            )
             for category_id in categories_id
         ]
-
-        # Создаем insert statement для пропуска дублирующих строк
-        stmt = insert(ProductCategory).values(values)
-
-        # Добавляем обработку конфликтов - пропускаем дубликаты
-        stmt = stmt.on_conflict_do_nothing(
-            index_elements=['product_id', 'category_id']  # предполагая, что это уникальная пара
-        )
-
-        # Выполняем запрос
-        self.session.execute(stmt)
+        self.session.add_all(new_rows)
         self.session.commit()
+        #
+        # # Создаем список словарей для массовой вставки
+        # values = [
+        #     {"product_id": product_id, "category_id": category_id}
+        #     for category_id in categories_id
+        # ]
+        #
+        # # Создаем insert statement для пропуска дублирующих строк
+        # stmt = insert(ProductCategory).values(values)
+        #
+        # # Добавляем обработку конфликтов - пропускаем дубликаты
+        # stmt = stmt.on_conflict_do_nothing(
+        #     index_elements=['product_id', 'category_id']  # предполагая, что это уникальная пара
+        # )
+        #
+        # # Выполняем запрос
+        # self.session.execute(stmt)
+        # self.session.commit()
 
     def save_product_property_values_relations(self, product_id: int, property_id: int, values: list = None):
         new_rows = [
